@@ -1,0 +1,69 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kautrack
+  labels:
+    {{- include "kautrack.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-api
+                port:
+                  number: {{ .Values.api.port }}
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-api
+                port:
+                  number: {{ .Values.api.port }}
+          - path: /static
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-api
+                port:
+                  number: {{ .Values.api.port }}
+          - path: /god-mode
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-admin
+                port:
+                  number: {{ .Values.admin.port }}
+          - path: /spaces
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-space
+                port:
+                  number: {{ .Values.space.port }}
+          - path: /live
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-live
+                port:
+                  number: {{ .Values.live.port }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-web
+                port:
+                  number: {{ .Values.web.port }}
+{{- end }}

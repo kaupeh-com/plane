@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kautrack-admin
+  labels:
+    {{- include "kautrack.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kautrack-admin
+spec:
+  replicas: {{ .Values.admin.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kautrack-admin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kautrack-admin
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: admin
+          image: "{{ .Values.images.admin.repository }}:{{ .Values.images.admin.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.admin.port }}
+              name: http
+          resources:
+            {{- toYaml .Values.admin.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault

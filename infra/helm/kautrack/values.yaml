@@ -1,0 +1,149 @@
+images:
+  api:
+    repository: ghcr.io/kaupeh-com/kautrack-api
+    tag: "latest"
+  web:
+    repository: ghcr.io/kaupeh-com/kautrack-web
+    tag: "latest"
+  admin:
+    repository: ghcr.io/kaupeh-com/kautrack-admin
+    tag: "latest"
+  space:
+    repository: ghcr.io/kaupeh-com/kautrack-space
+    tag: "latest"
+  live:
+    repository: ghcr.io/kaupeh-com/kautrack-live
+    tag: "latest"
+
+imagePullSecrets:
+  - name: ghcr-pull-secret
+
+secretName: kautrack-secrets
+
+api:
+  replicaCount: 1
+  port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+worker:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+beat:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+web:
+  replicaCount: 1
+  port: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+admin:
+  replicaCount: 1
+  port: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+space:
+  replicaCount: 1
+  port: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+live:
+  replicaCount: 1
+  port: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+migration:
+  enabled: true
+
+ingress:
+  enabled: true
+  className: nginx
+  host: kautrack.kaupeh.work
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  tls:
+    secretName: kautrack-tls
+
+env:
+  DEBUG: "0"
+  DOCKERIZED: "1"
+  USE_MINIO: "1"
+  GUNICORN_WORKERS: "2"
+  FILE_SIZE_LIMIT: "5242880"
+  SIGNED_URL_EXPIRATION: "3600"
+  HARD_DELETE_AFTER_DAYS: "60"
+  API_KEY_RATE_LIMIT: "60/minute"
+  MINIO_ENDPOINT_SSL: "0"
+  # Database
+  POSTGRES_HOST: "100.64.0.4"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "kautrack"
+  # Redis
+  REDIS_HOST: "redis-master.redis.svc"
+  REDIS_PORT: "6379"
+  # RabbitMQ
+  RABBITMQ_HOST: "rabbitmq.rabbitmq.svc"
+  RABBITMQ_PORT: "5672"
+  # MinIO
+  AWS_S3_ENDPOINT_URL: "http://minio.minio.svc:9000"
+  AWS_S3_BUCKET_NAME: "kautrack-uploads"
+  AWS_REGION: "us-east-1"
+  # URLs
+  WEB_URL: "https://kautrack.kaupeh.work"
+  ADMIN_BASE_URL: "https://kautrack.kaupeh.work"
+  ADMIN_BASE_PATH: "/god-mode"
+  SPACE_BASE_URL: "https://kautrack.kaupeh.work"
+  SPACE_BASE_PATH: "/spaces"
+  APP_BASE_URL: "https://kautrack.kaupeh.work"
+  APP_BASE_PATH: ""
+  LIVE_BASE_URL: "https://kautrack.kaupeh.work"
+  LIVE_BASE_PATH: "/live"
+  # KauID OIDC
+  KAUID_HOST: "https://id.kaupeh.work"
+  # CORS
+  CORS_ALLOWED_ORIGINS: "https://kautrack.kaupeh.work"

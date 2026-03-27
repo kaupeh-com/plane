@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kautrack-live
+  labels:
+    {{- include "kautrack.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kautrack-live
+spec:
+  replicas: {{ .Values.live.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kautrack-live
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kautrack-live
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: live
+          image: "{{ .Values.images.live.repository }}:{{ .Values.images.live.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.live.port }}
+              name: http
+          envFrom:
+            - configMapRef:
+                name: kautrack-config
+            - secretRef:
+                name: {{ .Values.secretName }}
+          resources:
+            {{- toYaml .Values.live.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault

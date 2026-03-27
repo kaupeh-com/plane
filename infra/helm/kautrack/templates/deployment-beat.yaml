@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kautrack-beat
+  labels:
+    {{- include "kautrack.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kautrack-beat
+spec:
+  replicas: {{ .Values.beat.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kautrack-beat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kautrack-beat
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: beat
+          image: "{{ .Values.images.api.repository }}:{{ .Values.images.api.tag }}"
+          imagePullPolicy: Always
+          command: ["./bin/docker-entrypoint-beat.sh"]
+          envFrom:
+            - configMapRef:
+                name: kautrack-config
+            - secretRef:
+                name: {{ .Values.secretName }}
+          resources:
+            {{- toYaml .Values.beat.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault

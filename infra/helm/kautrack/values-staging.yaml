@@ -1,0 +1,12 @@
+# Staging overrides — image tags updated by CI
+images:
+  api:
+    tag: "latest"
+  web:
+    tag: "latest"
+  admin:
+    tag: "latest"
+  space:
+    tag: "latest"
+  live:
+    tag: "latest"

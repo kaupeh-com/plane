@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kautrack-space
+  labels:
+    {{- include "kautrack.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kautrack-space
+spec:
+  replicas: {{ .Values.space.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kautrack-space
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kautrack-space
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: space
+          image: "{{ .Values.images.space.repository }}:{{ .Values.images.space.tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.space.port }}
+              name: http
+          resources:
+            {{- toYaml .Values.space.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
