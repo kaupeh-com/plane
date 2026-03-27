@@ -1,12 +1,13 @@
-# Staging overrides — image tags updated by CI
+# Staging overrides — auto-updated by CI
+# Tag: staging-1dfc05c (2026-03-27T15:42:35Z)
 images:
   api:
-    tag: "latest"
+    tag: "staging-1dfc05c"
   web:
-    tag: "latest"
+    tag: "staging-1dfc05c"
   admin:
-    tag: "latest"
+    tag: "staging-1dfc05c"
   space:
-    tag: "latest"
+    tag: "staging-1dfc05c"
   live:
-    tag: "latest"
+    tag: "staging-1dfc05c"
