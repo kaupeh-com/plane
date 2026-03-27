@@ -44,6 +44,10 @@ from .views import (
     GiteaOauthInitiateEndpoint,
     GiteaCallbackSpaceEndpoint,
     GiteaOauthInitiateSpaceEndpoint,
+    KauIDCallbackEndpoint,
+    KauIDOauthInitiateEndpoint,
+    KauIDCallbackSpaceEndpoint,
+    KauIDOauthInitiateSpaceEndpoint,
 )
 
 urlpatterns = [
@@ -149,5 +153,18 @@ urlpatterns = [
         "spaces/gitea/callback/",
         GiteaCallbackSpaceEndpoint.as_view(),
         name="space-gitea-callback",
+    ),
+    ## KauID Oauth
+    path("kauid/", KauIDOauthInitiateEndpoint.as_view(), name="kauid-initiate"),
+    path("kauid/callback/", KauIDCallbackEndpoint.as_view(), name="kauid-callback"),
+    path(
+        "spaces/kauid/",
+        KauIDOauthInitiateSpaceEndpoint.as_view(),
+        name="space-kauid-initiate",
+    ),
+    path(
+        "spaces/kauid/callback/",
+        KauIDCallbackSpaceEndpoint.as_view(),
+        name="space-kauid-callback",
     ),
 ]
