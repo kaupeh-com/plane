@@ -1,0 +1,145 @@
+name: Build and Deploy KauTrack (GitOps)
+
+on:
+  push:
+    branches: [preview]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  OPENBAO_ADDR: https://openbao.kaupeh.work
+  OPENBAO_ROLE: kautrack-deploy
+
+jobs:
+  build-images:
+    name: Build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      matrix:
+        include:
+          - service: api
+            context: ./apps/api
+            dockerfile: ./apps/api/Dockerfile.api
+            image: kaupeh-com/kautrack-api
+          - service: web
+            context: .
+            dockerfile: ./apps/web/Dockerfile.web
+            image: kaupeh-com/kautrack-web
+          - service: admin
+            context: .
+            dockerfile: ./apps/admin/Dockerfile.admin
+            image: kaupeh-com/kautrack-admin
+          - service: space
+            context: .
+            dockerfile: ./apps/space/Dockerfile.space
+            image: kaupeh-com/kautrack-space
+          - service: live
+            context: .
+            dockerfile: ./apps/live/Dockerfile.live
+            image: kaupeh-com/kautrack-live
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate image tag
+        id: tag
+        run: |
+          TAG="staging-$(echo ${{ github.sha }} | cut -c1-7)"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to OpenBao via GitHub OIDC
+        id: openbao
+        run: |
+          OIDC_TOKEN=$(curl -sS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://github.com/kaupeh-com" | jq -r '.value')
+          BAO_RESPONSE=$(curl -sS --request POST \
+            "${OPENBAO_ADDR}/v1/auth/jwt/login" \
+            --data "{\"role\":\"${OPENBAO_ROLE}\",\"jwt\":\"${OIDC_TOKEN}\"}")
+          BAO_TOKEN=$(echo "$BAO_RESPONSE" | jq -r '.auth.client_token')
+          if [ "$BAO_TOKEN" = "null" ] || [ -z "$BAO_TOKEN" ]; then
+            echo "::error::OpenBao authentication failed"
+            echo "$BAO_RESPONSE" | jq -r '.errors[]' 2>/dev/null
+            exit 1
+          fi
+          echo "::add-mask::${BAO_TOKEN}"
+          echo "token=${BAO_TOKEN}" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch GHCR credentials from OpenBao
+        id: ghcr-creds
+        run: |
+          GHCR_TOKEN=$(curl -sS -H "X-Vault-Token: ${{ steps.openbao.outputs.token }}" \
+            "${OPENBAO_ADDR}/v1/secret/data/cluster/ghcr" | jq -r '.data.data.token')
+          echo "::add-mask::${GHCR_TOKEN}"
+          echo "token=${GHCR_TOKEN}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: kaupeh-com
+          password: ${{ steps.ghcr-creds.outputs.token }}
+
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ matrix.image }}:${{ steps.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ matrix.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  update-values:
+    name: Update Helm Staging Values
+    needs: [build-images]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update values-staging.yaml
+        run: |
+          TAG="staging-$(echo ${{ github.sha }} | cut -c1-7)"
+          cat > infra/helm/kautrack/values-staging.yaml <<EOF
+          # Staging overrides — auto-updated by CI
+          # Tag: ${TAG} ($(date -u +%Y-%m-%dT%H:%M:%SZ))
+          images:
+            api:
+              tag: "${TAG}"
+            web:
+              tag: "${TAG}"
+            admin:
+              tag: "${TAG}"
+            space:
+              tag: "${TAG}"
+            live:
+              tag: "${TAG}"
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add infra/helm/kautrack/values-staging.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m "ci: update staging image tags [skip ci]"
+          git push
