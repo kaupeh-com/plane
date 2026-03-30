@@ -1,13 +1,13 @@
 # Staging overrides — auto-updated by CI
-# Tag: staging-f18d2ff (2026-03-30T15:47:26Z)
+# Tag: staging-da1fd75 (2026-03-30T16:11:47Z)
 images:
   api:
-    tag: "staging-f18d2ff"
+    tag: "staging-da1fd75"
   web:
-    tag: "staging-f18d2ff"
+    tag: "staging-da1fd75"
   admin:
-    tag: "staging-f18d2ff"
+    tag: "staging-da1fd75"
   space:
-    tag: "staging-f18d2ff"
+    tag: "staging-da1fd75"
   live:
-    tag: "staging-f18d2ff"
+    tag: "staging-da1fd75"
