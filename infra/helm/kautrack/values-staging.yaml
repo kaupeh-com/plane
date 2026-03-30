@@ -1,13 +1,13 @@
 # Staging overrides — auto-updated by CI
-# Tag: staging-35d3388 (2026-03-30T15:29:27Z)
+# Tag: staging-eb34290 (2026-03-30T15:34:11Z)
 images:
   api:
-    tag: "staging-35d3388"
+    tag: "staging-eb34290"
   web:
-    tag: "staging-35d3388"
+    tag: "staging-eb34290"
   admin:
-    tag: "staging-35d3388"
+    tag: "staging-eb34290"
   space:
-    tag: "staging-35d3388"
+    tag: "staging-eb34290"
   live:
-    tag: "staging-35d3388"
+    tag: "staging-eb34290"
