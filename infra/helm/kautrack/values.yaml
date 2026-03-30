@@ -126,7 +126,7 @@ env:
   # Redis
   REDIS_HOST: "redis-master.redis.svc"
   REDIS_PORT: "6379"
-  REDIS_URL: "redis://redis-master.redis.svc:6379/"
+  # REDIS_URL provided via secret (contains password)
   # RabbitMQ
   RABBITMQ_HOST: "rabbitmq.rabbitmq.svc"
   RABBITMQ_PORT: "5672"
