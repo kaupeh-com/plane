@@ -33,7 +33,8 @@ export const useCoreOAuthConfig = (oauthActionText: string): TOAuthConfigs => {
       (config?.is_google_enabled ||
         config?.is_github_enabled ||
         config?.is_gitlab_enabled ||
-        config?.is_gitea_enabled)) ||
+        config?.is_gitea_enabled ||
+        config?.is_kauid_enabled)) ||
     false;
   const oAuthOptions: TOAuthOption[] = [
     {
@@ -78,6 +79,20 @@ export const useCoreOAuthConfig = (oauthActionText: string): TOAuthConfigs => {
         window.location.assign(`${API_BASE_URL}/auth/gitea/${next_path ? `?next_path=${next_path}` : ``}`);
       },
       enabled: config?.is_gitea_enabled,
+    },
+    {
+      id: "kauid",
+      text: `${oauthActionText} with KauID`,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="4" fill="#4F46E5"/>
+          <text x="12" y="17" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">K</text>
+        </svg>
+      ),
+      onClick: () => {
+        window.location.assign(`${API_BASE_URL}/auth/kauid/${next_path ? `?next_path=${next_path}` : ``}`);
+      },
+      enabled: config?.is_kauid_enabled,
     },
   ];
 

@@ -147,6 +147,34 @@ class Command(BaseCommand):
                         is_encrypted=False,
                     )
                     self.stdout.write(self.style.SUCCESS(f"{key} loaded with value from environment variable."))
+                if key == "IS_KAUID_ENABLED":
+                    KAUID_HOST, KAUID_CLIENT_ID, KAUID_CLIENT_SECRET = get_configuration_value(
+                        [
+                            {
+                                "key": "KAUID_HOST",
+                                "default": os.environ.get("KAUID_HOST", ""),
+                            },
+                            {
+                                "key": "KAUID_CLIENT_ID",
+                                "default": os.environ.get("KAUID_CLIENT_ID", ""),
+                            },
+                            {
+                                "key": "KAUID_CLIENT_SECRET",
+                                "default": os.environ.get("KAUID_CLIENT_SECRET", ""),
+                            },
+                        ]
+                    )
+                    if bool(KAUID_HOST) and bool(KAUID_CLIENT_ID) and bool(KAUID_CLIENT_SECRET):
+                        value = "1"
+                    else:
+                        value = "0"
+                    InstanceConfiguration.objects.create(
+                        key="IS_KAUID_ENABLED",
+                        value=value,
+                        category="AUTHENTICATION",
+                        is_encrypted=False,
+                    )
+                    self.stdout.write(self.style.SUCCESS(f"{key} loaded with value from environment variable."))
         else:
             for key in keys:
                 self.stdout.write(self.style.WARNING(f"{key} configuration already exists"))

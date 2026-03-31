@@ -23,6 +23,7 @@ import { GiteaConfiguration } from "@/components/authentication/gitea-config";
 import { GithubConfiguration } from "@/components/authentication/github-config";
 import { GitlabConfiguration } from "@/components/authentication/gitlab-config";
 import { GoogleConfiguration } from "@/components/authentication/google-config";
+import { KauIDConfiguration } from "@/components/authentication/kauid-config";
 import { PasswordLoginConfiguration } from "@/components/authentication/password-config-switch";
 
 // Authentication methods
@@ -88,5 +89,18 @@ export const getCoreAuthenticationModesMap: (
     icon: <img src={giteaLogo} height={20} width={20} alt="Gitea Logo" />,
     config: <GiteaConfiguration disabled={disabled} updateConfig={updateConfig} />,
     enabledConfigKey: "IS_GITEA_ENABLED",
+  },
+  kauid: {
+    key: "kauid",
+    name: "KauID",
+    description: "Allow members to log in or sign up to KauTrack with their KauID accounts.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="4" fill="#4F46E5"/>
+        <text x="12" y="17" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">K</text>
+      </svg>
+    ),
+    config: <KauIDConfiguration disabled={disabled} updateConfig={updateConfig} />,
+    enabledConfigKey: "IS_KAUID_ENABLED",
   },
 });
