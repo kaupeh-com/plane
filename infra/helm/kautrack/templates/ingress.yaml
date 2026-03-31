@@ -38,6 +38,13 @@ spec:
                 name: kautrack-api
                 port:
                   number: {{ .Values.api.port }}
+          - path: /kautrack-uploads
+            pathType: Prefix
+            backend:
+              service:
+                name: kautrack-minio
+                port:
+                  number: 9000
           - path: /god-mode
             pathType: Prefix
             backend:
