@@ -40,6 +40,7 @@ class KauIDOauthInitiateSpaceEndpoint(View):
             state = uuid.uuid4().hex
             provider = KauIDOAuthProvider(request=request, state=state)
             request.session["state"] = state
+            request.session["pkce_code_verifier"] = provider.code_verifier
             auth_url = provider.get_auth_url()
             return HttpResponseRedirect(auth_url)
         except AuthenticationException as e:
@@ -79,7 +80,8 @@ class KauIDCallbackSpaceEndpoint(View):
             return HttpResponseRedirect(url)
 
         try:
-            provider = KauIDOAuthProvider(request=request, code=code)
+            code_verifier = request.session.get("pkce_code_verifier")
+            provider = KauIDOAuthProvider(request=request, code=code, code_verifier=code_verifier)
             user = provider.authenticate()
             user_login(request=request, user=user, is_space=True)
             url = (

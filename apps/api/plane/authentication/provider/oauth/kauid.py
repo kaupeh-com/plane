@@ -1,9 +1,13 @@
 # Kaupeh Pte Ltd — KauID OIDC Provider for KauTrack
 # Based on the Gitea OAuth provider pattern
 
+import base64
+import hashlib
 import os
+import secrets
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
+
 import pytz
 import requests
 
@@ -15,11 +19,19 @@ from plane.authentication.adapter.error import (
 )
 
 
+def _generate_pkce_pair():
+    """Generate a PKCE code_verifier and S256 code_challenge."""
+    code_verifier = base64.urlsafe_b64encode(secrets.token_bytes(32)).rstrip(b"=").decode("ascii")
+    digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
+    code_challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
+    return code_verifier, code_challenge
+
+
 class KauIDOAuthProvider(OauthAdapter):
     provider = "kauid"
     scope = "openid email profile"
 
-    def __init__(self, request, code=None, state=None, callback=None):
+    def __init__(self, request, code=None, state=None, callback=None, code_verifier=None):
         (KAUID_CLIENT_ID, KAUID_CLIENT_SECRET, KAUID_HOST) = get_configuration_value(
             [
                 {
@@ -60,6 +72,18 @@ class KauIDOAuthProvider(OauthAdapter):
             "response_type": "code",
             "state": state,
         }
+
+        if code is None:
+            # Initiate path: generate PKCE pair and embed challenge in auth URL.
+            # The verifier is stored on the instance so the view can persist it
+            # in the session for retrieval during the callback.
+            self.code_verifier, code_challenge = _generate_pkce_pair()
+            url_params["code_challenge"] = code_challenge
+            url_params["code_challenge_method"] = "S256"
+        else:
+            # Callback path: receive the verifier that was stored in the session.
+            self.code_verifier = code_verifier
+
         auth_url = f"{KAUID_HOST}/kauid/oauth/authorize?{urlencode(url_params)}"
 
         super().__init__(
@@ -84,6 +108,8 @@ class KauIDOAuthProvider(OauthAdapter):
             "redirect_uri": self.redirect_uri,
             "grant_type": "authorization_code",
         }
+        if self.code_verifier:
+            data["code_verifier"] = self.code_verifier
         headers = {"Accept": "application/json"}
         token_response = self.get_user_token(data=data, headers=headers)
         super().set_token_data(
