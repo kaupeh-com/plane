@@ -101,6 +101,17 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ matrix.image }}:${{ steps.tag.outputs.tag }}
             ${{ env.REGISTRY }}/${{ matrix.image }}:latest
+          build-args: |
+            VITE_API_BASE_URL=https://kautrack.kaupeh.work
+            VITE_API_BASE_PATH=/api
+            VITE_ADMIN_BASE_URL=https://kautrack.kaupeh.work
+            VITE_ADMIN_BASE_PATH=/god-mode
+            VITE_SPACE_BASE_URL=https://kautrack.kaupeh.work
+            VITE_SPACE_BASE_PATH=/spaces
+            VITE_APP_BASE_URL=https://kautrack.kaupeh.work
+            VITE_APP_BASE_PATH=
+            VITE_LIVE_BASE_URL=https://kautrack.kaupeh.work
+            VITE_LIVE_BASE_PATH=/live
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
