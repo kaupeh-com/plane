@@ -7,7 +7,7 @@ metadata:
     {{- include "kautrack.labels" . | nindent 4 }}
   annotations:
     argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,BeforeHookCreation
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 86400
