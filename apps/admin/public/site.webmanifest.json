@@ -1,7 +1,7 @@
 {
-  "name": "Plane God Mode",
-  "short_name": "Plane God Mode",
-  "description": "Plane helps you plan your issues, cycles, and product modules.",
+  "name": "KauTrack Admin",
+  "short_name": "KauTrack Admin",
+  "description": "KauTrack administration panel.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f9fafb",
