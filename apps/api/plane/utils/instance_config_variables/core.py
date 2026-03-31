@@ -147,7 +147,7 @@ gitea_config_variables = [
 kauid_config_variables = [
     {
         "key": "IS_KAUID_ENABLED",
-        "value": os.environ.get("IS_KAUID_ENABLED", "0"),
+        "value": "1",
         "category": "KAUID",
         "is_encrypted": False,
     },

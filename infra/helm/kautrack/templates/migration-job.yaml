@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: kautrack-migrate-{{ .Release.Revision }}
+  name: kautrack-migrate
   labels:
     {{- include "kautrack.labels" . | nindent 4 }}
   annotations:
