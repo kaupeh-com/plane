@@ -1,13 +1,13 @@
 # Staging overrides — auto-updated by CI
-# Tag: staging-f596cbd (2026-03-31T08:46:37Z)
+# Tag: staging-0ae7528 (2026-03-31T08:57:51Z)
 images:
   api:
-    tag: "staging-f596cbd"
+    tag: "staging-0ae7528"
   web:
-    tag: "staging-f596cbd"
+    tag: "staging-0ae7528"
   admin:
-    tag: "staging-f596cbd"
+    tag: "staging-0ae7528"
   space:
-    tag: "staging-f596cbd"
+    tag: "staging-0ae7528"
   live:
-    tag: "staging-f596cbd"
+    tag: "staging-0ae7528"
